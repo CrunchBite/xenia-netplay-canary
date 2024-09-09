@@ -1394,7 +1394,7 @@ void XLiveAPI::SelectNetworkInterface() {
     }
   }
 
-  XELOGI("Set network interface: {} {}", interface_name, cvars::network_guid);
+  XELOGI("Set network interface: {} {} {}", interface_name, cvars::network_guid, ip_to_string(local_ip_));
 
   assert_false(cvars::network_guid == "");
 }
