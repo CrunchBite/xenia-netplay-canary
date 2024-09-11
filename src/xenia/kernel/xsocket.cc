@@ -167,9 +167,6 @@ X_STATUS XSocket::Bind(const XSOCKADDR_IN* name, int name_len) {
   XSOCKADDR_IN sa_in = XSOCKADDR_IN();
   memcpy(&sa_in, name, sizeof(XSOCKADDR_IN));
 
-  // Bind to the local_ip_ address
-  sa_in.address_ip = XLiveAPI::LocalIP().sin_addr;
-
   sa_in.address_port =
       XLiveAPI::upnp_handler->GetMappedBindPort(name->address_port);
 

@@ -1472,6 +1472,9 @@ dword_result_t NetDll_bind_entry(dword_t caller, dword_t socket_handle,
     return -1;
   }
 
+  // Bind to the local_ip_ address
+  name->address_ip = XLiveAPI::LocalIP().sin_addr;
+
   X_STATUS status = socket->Bind(name, namelen);
   if (XFAILED(status)) {
     XThread::SetLastError(socket->GetLastWSAError());
