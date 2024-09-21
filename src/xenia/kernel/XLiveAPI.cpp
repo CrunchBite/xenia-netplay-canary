@@ -30,13 +30,16 @@ DEFINE_bool(logging, false, "Log Network Activity & Stats", "Live");
 DEFINE_bool(log_mask_ips, true, "Do not include P2P IPs inside the log",
             "Live");
 
-DEFINE_bool(offline_mode, false, "Offline Mode e.g. not connected to a LAN",
+DEFINE_bool(offline_mode, false, "Offline Mode, disable all Xbox Live functionality",
             "Live");
 
 DEFINE_bool(xlink_kai_systemlink_hack, false,
             "Enable hacks for XLink Kai support. May break some games. See: "
             "https://www.teamxlink.co.uk/wiki/Xenia_Support",
             "Live");
+
+DEFINE_bool(systemlink_always_allowed, true,
+            "Allow system link even if Offline Mode is enabled", "Live");
 
 DEFINE_string(network_guid, "", "Network Interface GUID", "Live");
 
@@ -200,20 +203,19 @@ void XLiveAPI::Init() {
   upnp_handler = new UPnP();
   mac_address_ = new MacAddress(GetMACaddress());
 
-  if (cvars::offline_mode) {
-    XELOGI("XLiveAPI:: Offline mode enabled!");
-    initialized_ = InitState::Failed;
-    return;
-  }
+  if (!cvars::offline_mode && cvars::upnp) {
+    // Download ports mappings before initializing UPnP.
+    DownloadPortMappings();
 
-  if (cvars::upnp) {
     upnp_handler->Initialize();
   }
 
   DiscoverNetworkInterfaces();
   SelectNetworkInterface();
 
-  online_ip_ = Getwhoami();
+  if (!cvars::offline_mode) {
+    online_ip_ = Getwhoami();
+  }
 
   if (!IsOnline()) {
     // Assign online ip as local ip to ensure XNADDR is not 0 for systemlink
@@ -228,8 +230,11 @@ void XLiveAPI::Init() {
     return;
   }
 
-  // Download ports mappings before initializing UPnP.
-  DownloadPortMappings();
+  if (cvars::offline_mode) {
+    XELOGI("XLiveAPI:: Offline mode enabled!");
+    initialized_ = InitState::Failed;
+    return;
+  }
 
   // Must get mac address and IP before registering.
   std::unique_ptr<HTTPResponseObjectJSON> reg_result = RegisterPlayer();

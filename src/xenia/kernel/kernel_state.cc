@@ -43,6 +43,7 @@ DEFINE_uint32(kernel_build_version, 1888, "Define current kernel version",
               "Kernel");
 
 DECLARE_bool(offline_mode);
+DECLARE_bool(systemlink_always_allowed);
 
 namespace xe {
 namespace kernel {
@@ -749,7 +750,8 @@ void KernelState::RegisterNotifyListener(XNotifyListener* listener) {
     uint32_t live_connection_state =
         cvars::offline_mode ? X_ONLINE_S_LOGON_DISCONNECTED
                             : X_ONLINE_S_LOGON_CONNECTION_ESTABLISHED;
-    uint32_t ethernet_link_state = cvars::offline_mode ? 0 : 1;
+    uint32_t ethernet_link_state =
+        (cvars::offline_mode && !cvars::systemlink_always_allowed) ? 0 : 1;
 
     listener->EnqueueNotification(0x02000001, live_connection_state);
     listener->EnqueueNotification(0x02000003, ethernet_link_state);

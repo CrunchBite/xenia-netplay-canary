@@ -45,6 +45,7 @@ DECLARE_bool(logging);
 DECLARE_bool(log_mask_ips);
 
 DECLARE_bool(offline_mode);
+DECLARE_bool(systemlink_always_allowed);
 
 DECLARE_bool(xlink_kai_systemlink_hack);
 
@@ -910,7 +911,7 @@ dword_result_t NetDll_XNetGetBroadcastVersionStatus_entry(dword_t caller,
 DECLARE_XAM_EXPORT1(NetDll_XNetGetBroadcastVersionStatus, kNetworking, kStub);
 
 dword_result_t NetDll_XNetGetEthernetLinkStatus_entry(dword_t caller) {
-  if (cvars::offline_mode) {
+  if (cvars::offline_mode && !cvars::systemlink_always_allowed) {
     return 0;
   }
 
